@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Effect Engine Results — Project: Esper Dev Log</title>
+  <meta name="description" content="Architectural results of Project: Esper's Effect Engine" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo-block">
+        <span class="logo-eyebrow">developer journal</span>
+        <h1 class="site-title"><a href="../index.html">Project: Esper</a></h1>
+        <span class="logo-sub">a roguelike, prioritizing depth</span>
+      </div>
+      <nav class="site-nav">
+        <a href="../index.html" class="nav-link">Log</a>
+        <a href="../about.html" class="nav-link">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <header class="article-header">
+      <div class="article-eyebrow">
+        <span>#003</span>
+        <time>2026-04-04</time>
+      </div>
+      <h1 class="article-title">Effect Engine Results</h1>
+      <div class="article-tags">
+        <span class="post-tag">vision</span> <span class="post-tag">engine</span>
+      </div>
+    </header>
+
+    <div class="article-body">
+      <p>Hello y'all,</p>
+<p>As referenced in the last post, today we'll talk a bit about the results of using this DSL to drive Project: Esper.</p>
+<h2>Combinatorics and Emergence</h2>
+<p>The immediate impact of building effects out of DSL atoms is that there are nearly endless ways they can be combined. This is exacerbated by the fact that every atom for every category of node is interchangeable within that category. So 23 different predicates can each have a dozen immediate children per slot, which in turn have a dozens of possible children of their own, and on ad nauseam. It would be imossible to enumerate, but there might be millions of possible effects 6 or 7 layers deep. More importantly, the vast majority of these effects are completely distinct because every node is essential, even if it's a rather small one, say targeting a different location or using a different damage type (not <em>every</em> effect is totally unique because there are subtle ways to program the same effect with different sets of nodes). The existence of many different unique effects also does not mean they are all useful, interesting, or even comprehensible, but having the backing of an entire programming language gives us such sheer <em>capacity</em> that the player should always be able to get excited about every new item they find (scratching that latent lootbox itch in a rather healthy way). It also implies an interesting sort of magic system: magic is everywhere and touches everything, but in very weird, unintuitive, and fragmented ways. What might the society that built this thing have intended for it? What's the history of this otherwise normal apple that deals 10x damage to specifically giant scorpions when thrown?</p>
+<h2>Randomized Items</h2>
+<p>As I keep circling back to, in addition to a myriad of handcrafted items, the DSL system will enable Project: Esper to sport a plethora of completely randomized items. We do this through the tier system to be balanced. Each atom in the DSL is assigned a "complexity weight." For atoms in the predicate, this roughly corresponds to the difficulty fulfilling effects that involve this predicate tend to be. It's easier for something to have more than 10% hp than for it to be on fire, it's harder still for there to be clone of it, and nigh impossible for it to have created Asmodeus or the player. So as we build out the predicate, we can keep track of the weight of its composite atoms and use that to determine the actualized tier of the effect. We then build out the output of the effect as well and determine its complexity weight, which corresponds instead to how powerful the innate capabilities of the effect are, to balance out the numeric values of those capabilities (essentially, roughly balancing quantity vs quality).</p>
+<p>So if we want to generate a tier 5 item, we want to add 10 total tiers-worth of effects (each item has on average 2 effects to be interesting). So we start with the first effect, and start there by generating the predicate. We constantly weight towards the desired tier while rolling (in addition to the aforementioned weights against inherently more difficult or rarer atoms) so we might end up with a tier 7 predicate. Now we want to generate a tier 7 output to match. So we roll there as well, again biasing but now towards tier 7, and end up with a tier 6 output. Now this is a tier 7 effect, so we apply the default tier-7 numbers to each atom in the output, but then also amplify them by +16.67% (7/6) to compensate for the lower complexity of the output, creating what ought to be a fairly balanced tier 7 effect to slap on the item. However, it still has 3 tiers of effect to add, so we repeat the process again, now targeting a tier 3 effect to complement the tier 7. Suppose we then end up with a tier 1 effect due to some weird predicate roll (maybe a static +5 fire resistance). We'd then need to add a third effect targeting tier 2 to get close enough to the target threshold.</p>
+<p>The basic algorithm is: ``<code> While current total tier is not within <1 tier of the target tier:     If there are no effects added yet, roll an effect targeting tier 1/2 of target tier     Else roll an effect targeting tier (target tier - total tier)     Append effect to item and update total tier </code>``</p>
+<p>You'll notice that we correct against low rolls by adding more effects, but do not have an equivalent correction against high rolls. This is by design for 2 reasons: 1. Bigger items that randomly have way crazier effects than they should is a lot more fun than items with sub-par effects that don't keep up with the stage of the game. 2. The predicate acts as a balancing factor. Just because your tier 1 item somehow managed to roll a tier 20 effect does not mean that will help you when the predicate in question is "(If the closest hostile creature to this is in the Plane of Ice or the closest hostile creature to this took the wait action within the last 7 rounds) and the closest creature to the weapon in the dominant hand of the player is able to attack...". In this case mostly because the effect only functions in the Plane of Ice.</p>
+<h2>Randomized Enemies</h2>
+<p>We can take this a step further and give these randomized items to enemies. There are 4 kinds of enemy in Project: Esper with regards to this: deterministic, half-random, seeded-random, and fully-random enemies. Each kind is associated with different enemy species (so a half-random goblin experimenter will always be half-random across playthroughs).</p>
+<ol><li>Deterministic NPCs always have the same loadout across runs, no randomization is done. This is mostly reserved for particular cases of very custom types of NPCs that might break in odd ways if randomized.</li><li>Half-random NPCs use a constant kit across runs as well, but are given the capacity for randomized item slots. This may range from some goblins weilding weapons with random abilities, or some creatures spawning with randomized items in their inventories. Although I call them "half-random", in most cases almost the whole kit will be deterministic, with a couple randomized items to represent ones the NPC found around the dungeon. Notably, every individual instance of a half-random NPC will have new items, unlike seeded-random NPCs</li><li>Seeded-random NPCs are similar to half-random ones, but the species as a whole is given a partially randomized kit for the duration of the run. Thus, the player can still learn how they work and apply that knowledge, but it does not persist across runs. Generally a larger portion of a seeded-random NPC species' kit will be randomized than for half-random NPC species.</li><li>Fully-random NPCs, AKA Espers, have completely randomized kits. They have random stats, slots, weaknesses, items, abilities, and could do literally anything. Despite all being called Espers, they are a collection of different mechanical species, and each species keeps the same randomized kit throughout a run, like seeded-random enemies. Like with items, dungeon level difficulty, and everything else, NPC species are divided into 20 tiers, with a certain set of species spawning at each tier. A tier of NPC species may also include Esper slots, which will be rolled into particular Esper species at the start of the run. Thus, the first couple tiers of difficulty will not include Espers to prevent swinginess, the mid-tiers will have the largest proportion, and towards the late game the proportion will die down again. This late-game phenomenon is because at that point, the player is expected to have "broken" the game in some manner, and so hand-crafted extremely dangerous species are given priority there since they can be purposefully designed to better combat such high-level builds. Note that the "Genocide" spell can be used to delete a particular species of NPC from the pool for the remainder of the run. In its place will be generated a new Esper species, so that every tier of NPC always has the same number of total species to spawn from and the dungeon never empties or homogenizes.</li></ol>
+<h2>Extensibility</h2>
+<p>Related to the first point about combinatorics, a big benefit of the DSL system is that every atom is self-contained and atomic. This means that adding new atoms (or even new categories of atom) is as simple as writing its self-contained definition, and it can immediately interface with every other existing atom. This makes enhancing the system to do new things literally as simple as possible, and means in the future and throughout potential updates we may be able to drastically increase the scope of possible atoms, and thus items, enemies, and other effects.</p>
+    </div>
+
+    <nav class="article-nav">
+      <a href="../index.html" class="article-nav-link prev">All entries</a>
+      
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-copy">built in public</span>
+      <div style="display:flex;gap:1.2rem;">
+        <a href="https://x.com/Project_Esper" target="_blank" class="footer-social">Twitter/X</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
