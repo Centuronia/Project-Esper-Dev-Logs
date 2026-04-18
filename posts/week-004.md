@@ -1,0 +1,64 @@
+---
+title: Ability Scores (and the Death of Charisma)
+date: 2026-04-17
+number: "004"
+tags: vision, engine
+excerpt: An overview of the 5 ability scores in Project: Esper and their orthogonality
+---
+
+Hello y'all,
+
+Today we'll take a step away from the last couple super architectural posts and take a look at the 5 ability scores in Project: Esper, how they represent orthogonal build dimensions, and why Charisma has been dropped from the standard repertoire.
+
+## Introduction
+
+Nearly if not all RPG systems have some kind of ability score system to represent different physical and mental aspects of different characters. Basically the idea is that not every character is equally good at everything, so there needs to be some way to quickly compare a character's skills in an area to another character's, and how good they are at one thing compared to another. Hailing from DnD itself, these are typically organized into a symmetrical split between mental and physical attributes, and (typically) broken down into Strength, Dexterity, Constitution, Wisdom, Intelligence, and Charisma (or proxies that represent them). Some games make the split much simpler, sometimes it's made even more granular, but this is probably the most recognizable sextet of scores.
+
+The idea is pretty simple too, with each ability score having a clear role and real-world parallel:
+- Strength is muscle and ability to throw weight around, carry stuff, etc. Raw bulk.
+- Dexterity is the other half of physical capabilties, measuring balance, hand-eye coordination, grace, etc.
+- Constitution represents the immune system and built-up "toughness" from experience. The kind of thing that a boxer learns over time even without learning any new skills or getting more muscular; just the ability to take a punch and keep going.
+- Intelligence is "book smarts"; learned knowledge and the ability to acquire it
+- Wisdom is "street smarts"; the kind of thing you don't learn in school, like judging whether a situation is dangerous, applying common sense, etc.
+- Charisma is your social skills; the ability to communicate effectively, get people to like you, and, in a more malicious sense, get them to do what you want.
+
+## Project: Esper
+
+Now, the most important part of these ability scores and their domains in any game is in creating a "build". You have some *thing* you want your character to do, and those things fall under certain abilities, so you want your character to be well-statted in those areas so that they're good at and naturally ought to do the *thing* you want them to. You want a big Guts-like swordfighter, invest in strength. You want to be really good at haggling with shopkeepers, invest in charisma.
+
+The problem, then, is that, as previously mentioned, in Project: Esper, builds are more of an emergent phenomenon. Basically, you can't go in with a character you want to make, because you don't know what items you'll find (or even exist!) So, like in many roguelikes (with the caveat that many traditional roguelikes tend to homogenize in the endgame into particular optimized meta equipment sets) the build has to be based on what you find and adapt over the course of the run, even as you invest in different strategies. So the question, then, is how ability scores can continue to matter and serve an important purpose in such a system. The answer is by reframing the purpose of ability scores as orthogonal meta-strategies rather than purely physical representations.
+
+## Orthogonality
+
+Orthogonality means "having a set of mutually perpendicular axes; meeting at right angles". While it's a mathematical term, its often used as a metaphor in game theoretic systems for any time there are multiple independent dimensions. For example, think of the skill trees in Skyrim. You can invest all the way to the end of the Smithing tree, but it does nothing for your Stealth. To advance your stealth capabilities, you have to invest in stealth, which will in turn not affect your smithing abilities at all. The two are orthogonal because your position in one dimension is completely independent of your position in the other. Likewise, classical ability scores are intentionally orthogonal. Constitution is the only ability that represents your ability to take a hit, strength is the only one that represents your abilty to carry heavy objects, etc. And so when we look at the six ability scores, we really have 6 orthogonal dimensions the player can invest in, and their score in the 6 areas determines which of those dimensions are more important to them. Interestingly, while the effects of these 6 dimensions are typically grouped by relatedness, they needn't be. Strength could determine your stealth and total carrying capacity, while agility determines both sleight of hand and maximum weapon weight. Ultimately the groupings arose naturally just to make things dead simple for a DM who had to determine live what ability an action would relate to, which isn't as necessary in the digital age (though player ability to reason about what a score does is still helpful of course).
+
+## Ability Scores as Meta-Strategic Dimensions
+
+Thus, even though items are inherently the driving force behind a build in Project: Esper, we can think of Ability Scores as orthogonal *ways of relating to and using items and effects*. This is a meta-strategy; a layer of strategic reasoning you *can* take into a run. Even though you don't know what you'll end up doing specifically, you can still say "I want to do Strength things" or "I want to do Wisdom things" and still go and do those things. Anyway, this has all been a very long build up to a relatively simple discussion of what the abilities actually represent, but the key is that they all have to represent unique dimensions with respect to the items.
+
+## Strength
+
+Strength is applied muscle, which makes it make sense as being tied to base carrying capacity and the weight of equipment that can be equipped. This represents "the simultaneous variety of available items you can use." Being able to carry more means A. you have more options to switch to as needed and B. you can have more passive in-inventory effects going at a time. Some items (not necessarily the stronger or better ones) are assigned a minimum strength requirement as well, and so higher strength increases the proportion of all items you find that you can use.
+
+## Dexterity
+
+Dexterity is about efficiency and speed; not wasting time, using things to their full extent. Dexterity determines your AP and RP pool, and so a higher dexterity literally means taking more actions and reactions per turn. Thus, dexterity represents "the amount of use you can get out of an item". You may not have more items to use, but dexterity allows you to use the ones you have to a greater extent.
+
+## Constitution
+
+Constitution is health and physical sustainability. In Project: Esper it determines your HP total, base damage resistances, and resistance to physical enemy effects. This represents "the ability to resist enemy items" or possibly "the ability to keep from being disrupted while using items" if you want to keep it player-oriented.
+
+## Intelligence
+
+Intelligence takes on an interesting role in Project: Esper. Often INT is associated both with finding / crafting / using items and also the magic system, but that would give it a somewhat contradictory role. Our theory is that magic is a dependable backup for items. You don't *need* magic, and there are things items can do that magic can't and vice-versa (we'll talk about the magic system in a future post), but having higher intelligence means you can use these spells in the first place, and that gives you options that you would not have had otherwise. Thus, intelligence represents "the ability to operate independently of the items you have" or put another way, to not be dependent on the items you get. This is both true in the sense of it being less important that you find particular items that do *things* you need (although there is some randomness to acquiring specific new spells, they can be approximately arrived at scientifically. See that future post) and in the sense of not being dependent on particular physical objects that can be destroyed, disrupted, etc. MP casting requirements seems to be the counterpart to the danger of items being destroyed and keep things in check; rather than suddenly losing a key item in an important moment, casting costs mean you always have to moderate your use. Crucially, spells do not have predicate requirements in the same way as item effects do.
+
+## Wisdom
+
+Wisdom is kind of the catch-all "luck" category, under the interpretation of Wisdom as the ability to respond well to situations and take actions in wise ways. Essentially, wisdom is the default "how well does something work" ability, and the used for the item equivalent of DnD's Spell Save DC and Spell Attack Bonus, as well as resistance to mental attacks.  Thus, wisdom embodies "the ability to get the best results out of each item effect". This makes Wisdom decidedly the most intangible and scattered ability, but whereas the other abilities have specific domains, Wisdom makes a lesser impact everywhere.
+
+## Charisma
+
+This leads into the biggest reason for not having Charisma, which is that every major base is already covered. It was already hard to think through a role for Wisdom, and although fill-in-all-the-cracks *IS* an important niche to fill, it's kind of fundamentally the last one. There's also just not a huge need for social skills. In any video game setting, everything you can say or do socially has to be prescripted (unless you integrate an LLM, but we are not connecting to any internal or external machine learning models here). Thus, it would be kind of weird to attach a social score to an encounter in any case. You'd have to either:
+- Have prescripted player responses generate random results, which isn't particularly realistic and kind of odd when you think about it. It also feels bad to give the player a bad outcome for something you forced them into, when they very well could have come up with something better to actually say. We certainly want deterministic dialogue.
+- Have higher charisma "unlock" new options FTL-style, representing new things your massive charisma birthed for you. Of course the downside is that the player will immediately see what the new option was, and just pick that. And that kind of has to be the best option, since we're saying it spawned from an *increase* in social skills.
+Really both options remove player agency, and Charisma just doesn't translate super well from a tabletop setting. Now. We could attach charisma to things like trade, maybe even finding items, and call it "the ability to acquire new items". However, that's ultimately the same domain as Strength, which, again, is about having more items to use. It's not that they're the same per se, but if Charisma was about item acquisition, then when a player says "I need to get more items to use", they could raise charisma *or* strength, and that's the orthogonality violation. In fact, item spawn rate will be preset for a given branch-level since tying it to any stat could lead to a lot of positive feedback very easily. So the primary utility charisma would seem to suggest isn't in fact novel anyway. Thus, since it's not needed, although it makes the stat list a little funny to read, we remove it.
