@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NPC AI — Project: Esper Dev Log</title>
+  <meta name="description" content="Creating deterministic strategies for nondeterministic effects" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo-block">
+        <span class="logo-eyebrow">developer journal</span>
+        <h1 class="site-title"><a href="../index.html">Project: Esper</a></h1>
+        <span class="logo-sub">a roguelike, prioritizing depth</span>
+      </div>
+      <nav class="site-nav">
+        <a href="../index.html" class="nav-link">Log</a>
+        <a href="../about.html" class="nav-link">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <header class="article-header">
+      <div class="article-eyebrow">
+        <span>#005</span>
+        <time>2026-04-25</time>
+      </div>
+      <h1 class="article-title">NPC AI</h1>
+      <div class="article-tags">
+        <span class="post-tag">vision</span> <span class="post-tag">gameplay</span>
+      </div>
+    </header>
+
+    <div class="article-body">
+      <p>Hello y'all,</p>
+<p>First, an important update. We are just about done creating the massize, 2000-line DSL interpreter that will eventually form the backbone of every effect interaction in Project: Esper, and everything is looking very promising. Finishing the interpreter revealed that many of the assumptions we'd made about data organization and inheritance trees when making the original roguelike demo were incorrect, so we've gone through, rebuilt the underlying data model, and are now just wrapping up linking it to the DSL interpreter and defining any methods that are required.</p>
+<h2>4 Major Roadblocks of the DSL</h2>
+<p>That means this is also a good time to pause and look at the four major capabiltiies that define getting everything set up for the DSL. Basically, once all four are complete, the core game engine will mostly be complete and development can primarily shift into worldbuilding and actual content. The four areas (and their statuses) are: 1. Programmability. We need a parser that can take in files written in the DSL and convert them to an AST that can be used in the game. This has been complete. 2. Interpretability. We need to be able to resolve the AST in the various required pipelines while running the game, so the DSL can be actualized. We are wrapping this up. 3. Reflection. This is the subject of today's post. We need to be able to take in arbitrary effects and have the game semantically understand, to some extent, what they are doing and mean, so that NPCs can effectively use and relate to them. This is where our focus will be shifting next. 4. Displayability. We need to be able to translate an AST-style effect into a pseudo-english user-readable representation so that players can actually understand what effects are meant to do. So as we shift into working on the reflection portion, it seems like a good time to discuss what that actually looks like.</p>
+<h2>Reflection</h2>
+<p>Reflection in programming generally refers to a language being able to refer to itself and its own composition. It is very meta. For example, I might want a function that lists out all the classes a given class inherits from, or lists all the fields and values of an object. These are examples of reflection. In Python you can even dynamically detect which libraries have been imported, import new ones, scan over them to see what functions are available, the comments in those functions, etc. In our case we are of course still in C++, but as we have the DSL, our "reflection" is to detect features of the AST that language generates (which isn't technically reflection, but the idea is similar enough that I think the metaphor holds).</p>
+<p>Namely, we need this for NPCs, as mentioned. Since we are procedurally generating parts and whole NPCs, we can't know when writing the game what capabilities an NPC might have. But the NPC still needs to act rationally. This is especially important in Project: Esper as a result of the effect predicate system we've been talking about. If an NPC has two effects, say "While on fire gain 5x damage" and "While within 3 units of a well gain +2 AP", the NPC ought to act in ways that enable those positive effects. In this case, the NPC ought to be more likely to stay on fire and near wells. While this seems simple to us when the effects are written out in english, we as the writers of the AI algorithm, again, have neither access to the english descriptions of the effects nor knowledge of which effects we'll even be dealing with.</p>
+<h2>Opacity</h2>
+<p>Our saving grace is in opacity. The player doesn't see how the NPC algorithm works or why it does what it does. NPCs are not meant to be paragons of logic, and in general ought to be fairly dumb. Think of Nethack. 90% of enemies just attack using whatever items they have, move to the player if out of range, or wander. Then there's the odd covetous enemies that teleport between the stairs and player, but still follow a very simple AI. The key is that the player really does want to interact with predictable NPCs. After all, NPCs are a dime a dozen compared to the player, so they should not be equal in most respects. This is all to say that if an NPC happens to behave idiosyncratically, counterintuitively, badly, or otherwise oddly, that is not a problem per se as in-canon it is trivially explained as "that's what the creature thought it should do". But although occasional mistakes can be allowed through this opacity, we still can't accept an AI that is consistently suicidal or actively works against itself, as at that point NPCs feel less like actual characters with different strategies and kits, and more just the same being over and over with random modifers. So the goal is to write an AI algorithm that: A. generally works towards its goals B. generally keeps its positive effects active C. generally uses a variety of actions and effects (to be non-homogenous) D. is generally fairly predictable</p>
+<h2>Algorithm</h2>
+<p>The core tension, again, is in the DSL and reflection. The AST we have simply doesn't lend itself well to strategic decisions. What we need is to convert the current AST into antoher form that does. While we don't yet have the concrete algorithm written, the core idea is to represent all inputs and outputs as the Status node (which represents a class of objects in some state). We realized that essentially all predicates and effects can be represented as some kind of status pressure.</p>
+<p>For example, "While on fire gain 5x damage". We can break the halves into desires and fulfillments: "I want to be on fire" and "I can deal more damage". "While within 3 units of a well gain +2 AP" becomes "I want to be close to wells" and "I can have more AP".</p>
+<p>For static effects, we assume that all positive stats are desired (AP, damage), and negative stats are undesired (weight, stat reduction). For triggered and activated effects, the atoms of the effect output can be mapped in similar ways. "... move 2 units towards the closest well" becomes "I can move towards wells", and "... attack the closest goblin" becomes "I can deal damage to goblins".</p>
+<p>We can then build out a basic profile. Every entity has some core motivations: - I want to be at full health - I want my enemies to die - I want my allies to be at full health - I want to acquire items - I want to maximize my positive stats - I want to minimize my negative stats</p>
+<p>etc.</p>
+<p>These in turn feed into which effects are desirable to have active. Adding to and completing the earlier effect profile: - "I want to be on fire" -> "I can deal more damage": desired, damage is positive - "I want to be close to wells" -> "I can have more AP": desired, AP is positive - "I want to take cold damage" -> "I can have a lower RP": <em>not</em> desired, RP is positive - "I want to have a free hand" -> "I can move towards wells": desired, I want to be close to wells - "I want to have <5% health" -> "I can deal damage to goblins": <em>not</em> desired, as I like goblins - "I want there to be a goblin with inventory >70% full" -> "I can deal damage to humans": desired, as I do not like humans</p>
+<p>This gives us a complete profile of additional non-core desired statuses: - I want to be on fire - I want to be close to wells - I want to have a free hand - I want there to be a goblin with inventory >70% full</p>
+<p>Now, suppose its time for this entity to take an action. Based on the current state of the world, all three of this entity's activated effects are available: move 2 units towards the closest well for 2AP, attack the closest goblin for 1AP, or attack the closest human for 3AP. However, none of its static effects are enabled. We can map these actions back to the desired predicate statuses to both weight them and determine which should not be taken: - "I can move towards wells": reinforces a predicate that is not active: 2 weight - "I can attack goblins": does not reinforce anything desired: 0 weight - "I can attack humans": reinforces a basic goal: 1 weight</p>
+<p>In implementation, these weights would be based more on the type of predicate or basic goal, their status, and combine the total weights from each contribution. We then can simply throw each action with non-zero weight into a raffle with tickets equal to weight (to encourage variety), and draw one randomly. In this case, we might draw the human-attacking option and elect to take that action. Do note that nowhere in this process are we checking for the availablity of a desirable target. If one isn't found (the NPC won't target things it doesn't want to except as a concession for an otherwise beneficial action), that action is simply removed from the raffle and a new action is drawn.</p>
+<p>The key remaining difficulty is just in actually translating the predicates and outputs of effects into Statuses. There's also a few edge cases, like the fact that something that allows an NPC to attack goblins OR humans ought to be treated as whichever mode is more preferable, but something that has an NPC randomly attack a goblin or a human needs to be penalized if one option isn't desirable. Furthermore, we need to deal with hierarchy to some extent. If a predicate wants "goblins with full inventory to be near wells" and we have an action that "moves goblins towards the closest furniture", we should recognize that that action does support that predicate, but not to the same extent as something that matched it more explicity.</p>
+    </div>
+
+    <nav class="article-nav">
+      <a href="../index.html" class="article-nav-link prev">All entries</a>
+      
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-copy">built in public</span>
+      <div style="display:flex;gap:1.2rem;">
+        <a href="https://x.com/Project_Esper" target="_blank" class="footer-social">Twitter/X</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
