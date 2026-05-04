@@ -296,6 +296,45 @@ a { color: inherit; text-decoration: none; }
 
 .article-body hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
 
+/* ── TABLES ── */
+.article-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.3rem;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.article-body thead {
+  border-bottom: 2px solid var(--border-strong);
+}
+
+.article-body th {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 400;
+  text-align: left;
+  padding: 0.5rem 1rem 0.5rem 0;
+}
+
+.article-body td {
+  padding: 0.55rem 1rem 0.55rem 0;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.article-body tr:last-child td {
+  border-bottom: none;
+}
+
+.article-body tbody tr:hover td {
+  background: var(--surface);
+}
+
 .article-nav {
   margin-top: 3rem;
   padding-top: 2rem;
