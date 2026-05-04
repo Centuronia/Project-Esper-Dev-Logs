@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Target Selection and Implementation-As-Documentation — Project: Esper Dev Log</title>
+  <meta name="description" content="NPC target selection and the emergence of personality and nonpredictable interactions" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo-block">
+        <span class="logo-eyebrow">developer journal</span>
+        <h1 class="site-title"><a href="../index.html">Project: Esper</a></h1>
+        <span class="logo-sub">a roguelike, prioritizing depth</span>
+      </div>
+      <nav class="site-nav">
+        <a href="../index.html" class="nav-link">Log</a>
+        <a href="../about.html" class="nav-link">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <header class="article-header">
+      <div class="article-eyebrow">
+        <span>#006</span>
+        <time>2026-05-03</time>
+      </div>
+      <h1 class="article-title">Target Selection and Implementation-As-Documentation</h1>
+      <div class="article-tags">
+        <span class="post-tag">technical</span> <span class="post-tag">gameplay</span>
+      </div>
+    </header>
+
+    <div class="article-body">
+      <p>Hello y'all,</p>
+<p>Continuing from last week's post about reflection and how we set up the NPC AI to choose which actions to take, today we're going to take a moment to talk about the other half of NPC AI: target selection of those chosen actions. This is pertinent because we've reached the point where it's time to implement, and we have a very interesting system cooked up.</p>
+<h2>Selection Types</h2>
+<p>First off, the only time that any of this "selection" happens is when a specific creature gets/needs to select parameters for a specific action or reaction it's planning to take. There are four selection functions that a given action might call:</p>
+<ol><li>select_one, where a list of entities is provided and the entity must choose one. For the player, they are presented with a list of entities they can move through and look at before selecting one.</li><li>select_direction, where the entity selects one of the 8 cardinal or intercardinal directions. For the player, they just press the corresponding direction key (which will be bound to the same key as moving in that direction).</li><li>select_tile, where the entity chooses any tile on the map. The player is given a cursor they can move around and look at stuff with before selecting the current position.</li><li>select_visible_tile, which is the same as select_tile except only tiles the entity/player can currently see are valid selections.</li></ol>
+<p>As of now, this small quartet constitutes the entire breadth of possible selections in the game.</p>
+<h2>Disposition</h2>
+<p>The first layer of the NPC selection algorithm is compilation. Once a given DSL effect is loaded into an AST during the intial game launch, we also iterate through to find all the output effect atoms. As a rule, these selection nodes can only be descendants of output effects in activated effects, since they don't really make sense for the more continuously-evaluated predicates or trigger trees, and manually targeted triggered abilities could get very annoying very quickly ("Every time any creature moves I have to manually say 'no, I do not want to fireball myself'"...) and represent intention in a way that triggered abilities don't really have. Thus, we know that every selection will be directly related to a specific effect atom or set thereof.</p>
+<p>These allow us to determine the general type of <em>thing</em> we're doing with the given selection, and most importantly, whether it is likely an offensive or defensive selection. For example, "attack" targets one entity and that entity should probably be one we don't like, while "heal" targets one entity and it probably should be one we do like, while "teleport" could go either way. We define this as the <strong>disposition</strong> of the effect atom and thus its child targets and selection nodes. Note that sometimes the disposition of two of an atom's targets will be different (Attack actually has two targets: one for who does the attack and one for who receives it, and these have different dispositions).</p>
+<h2>Base Point</h2>
+<p>One way of looking at all four selection types is that they can all be defined by the location of a single entity. For select_one, literally just choose that entity. For select_direction, the direction is the direction from the selecting entity to the positional entity. Select_tile and select_visible tile are both just the position of the entity. Looking at the four modes in this way also has the advantage of fitting nicely with a lot of information we already have available, as the engine is very entity-centric (as entities are every object in the game).</p>
+<p>So we can essentially ignore the specific selection type and follow the same remainder of this algorithm in all 4 cases, just understanding that at the end we will get our final selection via the respective process outlined above.</p>
+<p>First we need an initial set of entities. For select_one, there's the conveniently passed-in set of entities we're given. For the others, we just take the set of all visible entities (as NPCs oughtn't be aware for these purposes of entities they can't see). Then we filter out this initial set by disposition; if we're trying to arrive at something related to friendly entities, only keep those ones, and likewise for hostiles. Then all that's left is to arbitrarily pick one of the remaining entities. Theoretically any choice is rational, as the NPC shouldn't end up casting Power Word: Kill on any allies since they aren't hostile. Nevertheless, we want to be a little more systematic in how we make this selection.</p>
+<h2>Personality</h2>
+<p>We define 17 different selection modes, which are ways of filtering or selecting from the remaining entity pool. Each is associated with a particular intelligence threshold, which is essentially the representation of the tactical load required to effectively follow this mode. It also means that more intelligent NPCs will generally use more interesting targeting mechanisms (it does not, however, mean that they will be chosen more intelligently). Still, each NPC is assigned a particular selection mode per selection node in each effect, from their available choices, that they will always use for that particular selection node. This is a weighted table, so less complex or idiosyncratic modes will be more common. The process essentially represents the NPCs particular personality and how they have learned to apply their skills. Suppose there are three mind flayers with the ability "Teleport target entity to target point". The first might have learned to use this ability to teleport itself towards enemies to attack. The second teleports its enemies towards its allies instead. And the third simply reserves the ability for beating a speedy retreat and guerilla warfare. The same ability can be used tactically in different ways, and the existence of diverse targeting modes enables the various NPCs the player encounters to show real personality, make the most of their abilities, and act almost adversarially. The full table is below:</p>
+<table><thead><tr><th>Mode</th><th>INT Threshold</th><th>Description</th></tr></thead><tbody><tr><td>Random</td><td>0</td><td>Chosen randomly from entity set</td></tr><tr><td>Closest</td><td>0</td><td>The closest entity in the set</td></tr><tr><td>Self</td><td>0</td><td>Targets itself if possible</td></tr><tr><td>Most Hated</td><td>2</td><td>Targets least liked entity</td></tr><tr><td>Least Hated</td><td>3</td><td>Targets most liked entity</td></tr><tr><td>Last Damaged Me</td><td>4</td><td>The entity that most recently damaged it, if applicable</td></tr><tr><td>Weakest</td><td>6</td><td>The weakest entity (based on tier/level/equipment)</td></tr><tr><td>Farthest</td><td>8</td><td>The farthest entity</td></tr><tr><td>Last Buffed Me</td><td>9</td><td>The entity that most recently applied a positive status effect or healed it, if applicable</td></tr><tr><td>Cluster</td><td>10</td><td>The center point of all entity positions in the set. In the case of select_one, then finds the closest entity to the center</td></tr><tr><td>Least Damaged</td><td>11</td><td>The least damaged entity in the set</td></tr><tr><td>Most Damaged</td><td>12</td><td>The most damaged entity in the set</td></tr><tr><td>Strongest</td><td>12</td><td>The strongest entity (based on tier/level/equipment)</td></tr><tr><td>Damaged Me Most</td><td>13</td><td>The entity that has done the most total damage to it of the ones in the set, if any</td></tr><tr><td>First Damaged Me</td><td>14</td><td>The first entity that damaged it, if applicable</td></tr><tr><td>Exposed</td><td>14</td><td>The entity in the set farthest from the center point of all entity positions in the set</td></tr><tr><td>Interruptable</td><td>15</td><td>Any entity that is currently activating an ability but has not finished yet</td></tr></tbody></table>
+<p>In case a mode isn't applicable or can't find a valid target in the set (most often due to dispositional differences), it will fall back to the entry directly above it. Before reaching Random in this way (but not if Random was selected as the entity's behavior for this selection node), the selection will attempt to be cancelled.</p>
+<h2>Inverses</h2>
+<p>For selection types except select_one, each selection mode can also be used in its normal or inverse modes. Currently the plan is for inverse mode to be selected randomly 25% of the time, for any selection mode available except the highest-ranked. This means that Interruptable cannot be inverted (subject to change). An inverse selection is applied after the initial base entity or point is decided. Then:</p>
+<ol><li>In the case of select_direction, the exact opposite direction is used, which is mathematically the direction from the selected entity towards the selecting one</li><li>In the case of select_tile, the tile mirrored on the opposite side of the selecting entity from the selected one is used</li><li>Select_visible works the same as select_tile, but chooses the closest visible tile to the new selected one</li></ol>
+<p>These all demonstrate the same idea, but are important for things like running away.</p>
+<h2>Conclusion</h2>
+<p>The goal is for NPC encounters to be both interesting and rational. By encoding specific behavior patterns per-NPC in this way, we can hopefully provide both consistency and creativity. You can trust that NPCs will use their abilities in reasonable and advantageous ways, but how exactly they will choose to do so is a product of their own thought processes and personality. You might just encounter a Master Lich that really, really likes to fireball sheep.</p>
+    </div>
+
+    <nav class="article-nav">
+      <a href="../index.html" class="article-nav-link prev">All entries</a>
+      
+    </nav>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-copy">built in public</span>
+      <div style="display:flex;gap:1.2rem;">
+        <a href="https://x.com/Project_Esper" target="_blank" class="footer-social">Twitter/X</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
