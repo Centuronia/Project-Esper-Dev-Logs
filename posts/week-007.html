@@ -38,13 +38,13 @@
     <div class="article-body">
       <p>Hello y'all,</p>
 <p>Even though we haven't gotten any dev logs out in the past few weeks, we've nonetheless been hard at work on Project: Esper, and have an exciting announcement for today: our very first gameplay preview!</p>
-<video controls playsinline><source src="assets/week-007/gameplay_complete.mov" type="video/mov">Your browser doesn't support video.</video>
+<video controls playsinline><source src="week-007/gameplay_complete.mov" type="video/mov">Your browser doesn't support video.</video>
 <p>Now of course this is just a very, very first look at the game and there's a lot still to be done. But a lot of stuff is going right behind the scenes to get this working, and there's a few features in particular we'd like to point out:</p>
 <h2>Menuing</h2>
 <p>Project: Esper sports a layered, fully dynamic windowing system. As we show, the UI is divided into different menus and submenus. Each dynamically adapt and size based on their content, meaning wasted space is minimal. They also visually overlap each other so the window stack is clear. Lastly, windows support internal tabs so information can be easily organized. Of course, direct key-to-action bindings are also supported, and further customization options will be added later, as well as such necessary macros as move-to-point to keep things moving.</p>
 <h2>Visibility</h2>
 <p>Keeping track of your surroundings is very important in any traditional roguelike, so we gave Project: Esper  a visibility and memory system to help with keeping stock of the situation. Tiles that are currently visible (from line of sight, scrying-type effects, or anything else) are displayed in full color, while tiles you've seen before but aren't right now are given a darkened appearance. This makes it very clear what is currently visible, and many traditional roguelikes have a kind of this feature. However, we also store the last glyph visible on any tile, and preserve and continue to display that. This way, if you previously saw a fiend off across the dungeon, you can remember it was over there to avoid it on subsequent trips through the same area. Or if you had to leave some loot behind, finding it again is faster than ever.</p>
-<video controls playsinline><source src="assets/week-007/visibility.mov" type="video/mov">Your browser doesn't support video.</video>
+<video controls playsinline><source src="week-007/visibility.mov" type="video/mov">Your browser doesn't support video.</video>
 <h2>Activated Effects</h2>
 <p>We've talked a lot about the crazy custom programming language driving the effect system of Project: Esper, and we can finally show off what that looks like! All the abilities used in this demo (and really throughout the whole game) were written in-language. The move abilities used to travel around are defined like:</p>
 <pre><code class="language-walk_north = active empty move player n 1 bimodal 5 5 ;```">
