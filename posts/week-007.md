@@ -10,7 +10,7 @@ Hello y'all,
 
 Even though we haven't gotten any dev logs out in the past few weeks, we've nonetheless been hard at work on Project: Esper, and have an exciting announcement for today: our very first gameplay preview!
 
-![Gameplay Preview - Complete](week-007/gameplay_complete.mov)
+![Gameplay Preview - Complete](week-007/gameplay_complete.mp4)
 
 Now of course this is just a very, very first look at the game and there's a lot still to be done. But a lot of stuff is going right behind the scenes to get this working, and there's a few features in particular we'd like to point out:
 
@@ -22,7 +22,7 @@ Project: Esper sports a layered, fully dynamic windowing system. As we show, the
 
 Keeping track of your surroundings is very important in any traditional roguelike, so we gave Project: Esper  a visibility and memory system to help with keeping stock of the situation. Tiles that are currently visible (from line of sight, scrying-type effects, or anything else) are displayed in full color, while tiles you've seen before but aren't right now are given a darkened appearance. This makes it very clear what is currently visible, and many traditional roguelikes have a kind of this feature. However, we also store the last glyph visible on any tile, and preserve and continue to display that. This way, if you previously saw a fiend off across the dungeon, you can remember it was over there to avoid it on subsequent trips through the same area. Or if you had to leave some loot behind, finding it again is faster than ever.
 
-![Visibility Preview](week-007/visibility.mov)
+![Visibility Preview](week-007/visibility.mp4)
 
 ## Activated Effects
 
