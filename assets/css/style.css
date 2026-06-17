@@ -335,6 +335,20 @@ a { color: inherit; text-decoration: none; }
   background: var(--surface);
 }
 
+.article-body img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1rem 0;
+}
+
+.article-body video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1rem 0;
+}
+
 .article-nav {
   margin-top: 3rem;
   padding-top: 2rem;
