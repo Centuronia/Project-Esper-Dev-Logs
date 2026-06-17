@@ -28,16 +28,21 @@ Keeping track of your surroundings is very important in any traditional roguelik
 
 We've talked a lot about the crazy custom programming language driving the effect system of Project: Esper, and we can finally show off what that looks like! All the abilities used in this demo (and really throughout the whole game) were written in-language. The move abilities used to travel around are defined like:
 
-```walk_north = active empty move player n 1 bimodal 5 5 ;```
+```
+walk_north = active empty move player n 1 bimodal 5 5 ;
+```
 
 The Boots of Maximum HP have the effects:
 
-```hp_bonus = static empty stat_increase "max_hp" 5 ;
-greater_hp_bonus = static empty stat_increase "max_hp" 15 ;```
+```
+hp_bonus = static empty stat_increase "max_hp" 5 ;
+greater_hp_bonus = static empty stat_increase "max_hp" 15 ;
+```
 
 Though the second ability is only granted while equipped. The Boots of Healing grant the heal_basic effect shown at the end, defined as:
 
-```extern basic_heal = active proper_status
+```
+extern basic_heal = active proper_status
 		player
 		 snot hp_gt 75
 	heal
@@ -50,13 +55,15 @@ Though the second ability is only granted while equipped. The Boots of Healing g
 	 bimodal
 		1
 		1
-;```
+;
+```
 
 Which looks complicated but basically just has a condition of being below 75% health to use, and then for 1AP or RP heals the user for 20% of their health (which is a somewhat insane ability tbh, but was interesting to play with for the demo, especially since the BoMH were already effectively lowering the player's total health percentage by raising their max but not current health).
 
 Even Equip and Pick Up are defined in the DSL (though they have to delegate to some custom logic due to their unusual functions not being something we want in the general randomization pool):
 
-```extern pick_up = active empty
+```
+extern pick_up = active empty
 	with_single
 		manual_single object_with_status
 				entity_type "Item"
@@ -78,7 +85,8 @@ extern equip = active empty
 		"item"
 		program "equip_lambda"
 	action_only 5
-;```
+;
+```
 
 ## Next Steps
 
