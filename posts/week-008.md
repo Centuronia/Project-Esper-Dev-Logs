@@ -3,7 +3,7 @@ title: NPC Implementation
 date: 2026-06-16
 number: "008"
 tags: gameplay, demo, engine, ai
-excerpt: Implemnentation of NPC AI that adapts to dynamic effects and situations
+excerpt: Implementation of NPC AI that adapts to dynamic effects and situations
 ---
 
 Hello y'all,
